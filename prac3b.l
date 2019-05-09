@@ -28,7 +28,7 @@ lcomentario [/][/].*$
 <MCOMMENT>(.|\n) ;
 <MCOMMENT>[*][/] {BEGIN INITIAL; printf("Multiline comment\n");}
 class { printf("%s", yytext); return CLASS;}
-[{] {return yytext[0];}
-[}] {}
+[{}] {return yytext[0];}
 \n line_number++;
 {id} {printf("ID: %s\n", yytext); return ID;}
+. ;
