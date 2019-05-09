@@ -15,6 +15,7 @@ void body();
 void func();
 void func1();
 void func2();
+void code();
 
 int main() {
   preanalisis = yylex();
@@ -59,9 +60,35 @@ void func1() {
   if (preanalisis == ID) {
     parea(ID);
     func1();
-  } else if (preanalisis == ';' || preanalisis == '(') {
+  } else if (preanalisis == ';' || preanalisis == '(' || preanalisis == ')') {
   } else {
     printf("func1:");
+    error();
+  }
+}
+
+void code() {
+  if (preanalisis == ID) {
+    strcpy (id1, yytext);
+    parea(ID);
+    code();
+  } else if (preanalisis == ';') {
+    parea(';');
+    code();
+  } else if (preanalisis == '(') {
+    printf("%s\n", id1);
+    parea('(');
+    code();
+    parea(')');
+    code();
+  } else if (preanalisis == '{') {
+    parea('{');
+    code();
+    parea('}');
+    code();
+  } else if (preanalisis == ')' || preanalisis == '}') {
+  } else {
+    printf("code:");
     error();
   }
 }
@@ -69,8 +96,9 @@ void func1() {
 void func() {
   if (preanalisis == '{') {
     parea('{');
-    printf("CODE\n");
-    preanalisis = 0;
+    code();
+    parea('}');
+    body();
   } else if (preanalisis == ';') {
     parea(';');
     body();
@@ -88,7 +116,7 @@ void func2() {
     func();
   } else if (preanalisis == ';') {
     parea(';');
-    printf("VAR GLOBAL");
+    // printf("VAR GLOBAL");
     body();
   } else {
     printf("func2:");

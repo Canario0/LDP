@@ -22,13 +22,13 @@ lcomentario [/][/].*$
  */
  int line_number = 1;
 %%
-[ \t] printf("%s", yytext);
+[ \t] ;
 {lcomentario} {printf("Inline comment\n");}
 [/][*] {BEGIN MCOMMENT;}
 <MCOMMENT>(.|\n) ;
 <MCOMMENT>[*][/] {BEGIN INITIAL; printf("Multiline comment\n");}
-class { printf("%s", yytext); return CLASS;}
+class {return CLASS;}
 [{};()] {return yytext[0];}
 \n line_number++;
-{id} {printf("ID: %s\n", yytext); return ID;}
+{id} {/*printf("ID: %s\n", yytext);*/ return ID;}
 . ;
