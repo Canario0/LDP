@@ -7,11 +7,12 @@ int preanalisis;
 char id1[LONG], id2[LONG];
 char nombreClase[LONG];
 
-void parea (int);
-void error ();
+void parea(int);
+void error();
 void prog();
 void before_class();
 void body();
+void func();
 void func1();
 void func2();
 
@@ -54,30 +55,45 @@ void before_class() {
   }
 }
 
-void func1(){
-	if(preanalisis == ID){
-		parea(ID);
-		func1();
-	} else if (preanalisis == ';' || preanalisis == '('){
-
-	}else
-	{
-		printf("func1");
-		error();
-	}
-	
+void func1() {
+  if (preanalisis == ID) {
+    parea(ID);
+    func1();
+  } else if (preanalisis == ';' || preanalisis == '(') {
+  } else {
+    printf("func1:");
+    error();
+  }
 }
 
-void func2(){
-	if(preanalisis=='('){
-		parea('(');
-		printf("PARAMS");
-		preanalisis= 0;
-	} else if (preanalisis == ';'){
-		parea(';');
-		printf("VAR GLOBAL");
-		body();
-	}
+void func() {
+  if (preanalisis == '{') {
+    parea('{');
+    printf("CODE\n");
+    preanalisis = 0;
+  } else if (preanalisis == ';') {
+    parea(';');
+    body();
+  } else {
+    printf("func:");
+    error();
+  }
+}
+
+void func2() {
+  if (preanalisis == '(') {
+    parea('(');
+    func1();
+    parea(')');
+    func();
+  } else if (preanalisis == ';') {
+    parea(';');
+    printf("VAR GLOBAL");
+    body();
+  } else {
+    printf("func2:");
+    error();
+  }
 }
 
 void body() {
