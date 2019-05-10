@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "lex.yy.c"
-#define LONG 100  // longitud de los identificadores
+#define LONG 500  // longitud de los identificadores
 int preanalisis;
 char id1[LONG], id2[LONG];
 char nombreClase[LONG];
+FILE *out_file;
 
 void parea(int);
 void error();
@@ -16,13 +17,21 @@ void func();
 void func1();
 void func2();
 void code();
+void params();
 
 int main() {
+  out_file = fopen("out", "w");
+  if (out_file == NULL) {
+    printf("Error! Could not open file\n");
+    exit(-1);
+  }
+  fprintf(out_file, "graph G {\n\tnode [shape=box];\n");
   preanalisis = yylex();
   prog();
-  if (preanalisis == 0)  // yylex() devuelve 0 en el fin de fichero
+  if (preanalisis == 0) {  // yylex() devuelve 0 en el fin de fichero
     printf("OK\n");
-  else
+    fprintf(out_file, "}\n");
+  } else
     printf("Sobra algo\n");
 }
 
@@ -58,25 +67,37 @@ void before_class() {
 
 void func1() {
   if (preanalisis == ID) {
+    strcpy(id1, yytext);
     parea(ID);
     func1();
-  } else if (preanalisis == ';' || preanalisis == '(' || preanalisis == ')') {
+  } else if (preanalisis == ';' || preanalisis == '(') {
   } else {
     printf("func1:");
     error();
   }
 }
 
+void params() {
+  if (preanalisis == ID) {
+    parea(ID);
+    params();
+  } else if (preanalisis == ')') {
+  } else {
+    printf("params:");
+    error();
+  }
+}
+
 void code() {
   if (preanalisis == ID) {
-    strcpy (id1, yytext);
+    strcpy(id2, yytext);
     parea(ID);
     code();
   } else if (preanalisis == ';') {
     parea(';');
     code();
   } else if (preanalisis == '(') {
-    printf("%s\n", id1);
+    fprintf(out_file,"\t\"%s\" -- \"%s\";\n", id1, id2);
     parea('(');
     code();
     parea(')');
@@ -111,12 +132,11 @@ void func() {
 void func2() {
   if (preanalisis == '(') {
     parea('(');
-    func1();
+    params();
     parea(')');
     func();
   } else if (preanalisis == ';') {
     parea(';');
-    // printf("VAR GLOBAL");
     body();
   } else {
     printf("func2:");
@@ -127,6 +147,7 @@ void func2() {
 void body() {
   if (preanalisis == ID) {
     parea(ID);
+    strcpy(id1, yytext);
     parea(ID);
     func1();
     func2();
