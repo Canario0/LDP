@@ -15,8 +15,11 @@ void before_class();
 void body();
 void func();
 void func1();
+void inter();
+void llaves();
 void func2();
 void code();
+void code2();
 void params();
 
 int main() {
@@ -65,12 +68,27 @@ void before_class() {
   }
 }
 
+void inter() {
+  if (preanalisis == ID) {
+    parea(ID);
+    func1();
+  } else if (preanalisis == '{') {
+    parea('{');
+    code2();
+    parea('}');
+    body();
+  } else {
+    printf("inter:");
+    error();
+  }
+}
+
 void func1() {
   if (preanalisis == ID) {
     strcpy(id1, yytext);
     parea(ID);
     func1();
-  } else if (preanalisis == ';' || preanalisis == '(') {
+  } else if (preanalisis == ';' || preanalisis == '(' || preanalisis == '{') {
   } else {
     printf("func1:");
     error();
@@ -97,7 +115,7 @@ void code() {
     parea(';');
     code();
   } else if (preanalisis == '(') {
-    fprintf(out_file,"\t\"%s\" -- \"%s\";\n", id1, id2);
+    fprintf(out_file, "\t\"%s\" -- \"%s\";\n", id1, id2);
     parea('(');
     code();
     parea(')');
@@ -110,6 +128,30 @@ void code() {
   } else if (preanalisis == ')' || preanalisis == '}') {
   } else {
     printf("code:");
+    error();
+  }
+}
+
+void code2() {
+  if (preanalisis == ID) {
+    parea(ID);
+    code2();
+  } else if (preanalisis == ';') {
+    parea(';');
+    code2();
+  } else if (preanalisis == '(') {
+    parea('(');
+    code2();
+    parea(')');
+    code2();
+  } else if (preanalisis == '{') {
+    parea('{');
+    code2();
+    parea('}');
+    code2();
+  } else if (preanalisis == ')' || preanalisis == '}') {
+  } else {
+    printf("code2:");
     error();
   }
 }
@@ -129,6 +171,19 @@ void func() {
   }
 }
 
+void llaves() {
+  if (preanalisis == '{') {
+    parea('{');
+    llaves();
+    parea('}');
+    llaves();
+  } else if (preanalisis == '}') {
+  } else {
+    printf("llaves:");
+    error();
+  }
+}
+
 void func2() {
   if (preanalisis == '(') {
     parea('(');
@@ -138,6 +193,13 @@ void func2() {
   } else if (preanalisis == ';') {
     parea(';');
     body();
+  }else if (preanalisis == '{'){
+    parea('{');
+    llaves();
+    parea('}');
+    parea(';');
+    body();
+  }else if (preanalisis == '}') {
   } else {
     printf("func2:");
     error();
@@ -148,12 +210,18 @@ void body() {
   if (preanalisis == ID) {
     parea(ID);
     strcpy(id1, yytext);
-    parea(ID);
-    func1();
+    // parea(ID);
+    // func1();
+    inter();
     func2();
-  } else if (preanalisis == '}') {
+  } else if (preanalisis == '{') {
+    parea('{');
+    code2();
+    parea('}');
+    body();
+  } else if (preanalisis == '}' || preanalisis == ';' || preanalisis == '(') {
   } else {
-    printf("clase:");
+    printf("body:");
     error();
   }
 }

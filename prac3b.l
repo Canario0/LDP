@@ -8,18 +8,7 @@
 let [A-Za-zñ_$]
 dig [0-9]
 id {let}({let}|{dig}|[.*]|[ ]*\[{dig}*\])*
-frac [.]{dig}+
-expo [eE][+-]?{dig}+
-dec {dig}+({frac}|{expo})
-num {dig}+
-cadena \"[^"]*\"
 lcomentario [/][/].*$
- // reservado (import|class|package|private|public|static|throws|return|final|const|instanceof|enum|if|else|switch|case|break|default|for|do|while|try|catch|finally|new|this|super)
- // operadores ("+"{1,2}|"-"{1,2}|!|~|"*"|"/"|%|<|>|<=|>=|==|!=|&|"^"|"|"{1,2}|&{1,2}|"?"|:|=|"+="|"-="|"*="|"/="|%=|&=|"^="|"|="|[,.;])
- // operando (null|true|false|boolean|byte|int|float|chat|double|long|short|signed|unsigned|void|{cadena}|{dec}|{num}|{var})
- /* mcomment: comentarios multilínea
-    lcomment: comentarios simples
- */
  int line_number = 1;
 %%
 [ \t] ;
