@@ -8,30 +8,38 @@ public class Array {
         int a;
     }
 
+    public Array(){
+        f1();
+        String a = new String()
+    }
     static {
         int b;
     }
 
     public static void main(String[] args) {
         int[][] array = {{1, 2}, {3, 4}, {5, 6, 7}};
-        func11();
-        int a = cacota();
-        aas()
+        func2();
+        int a = f3();
+        aas();
+        f4();
+        main();
         System.out.println(Arrays.deepToString(array));
     }
 
     {
         int b;
-        ass();
+        f4();
     }
 
     public static void aas() {
         int[][] array = {{1, 2}, {3, 4}, {5, 6, 7}};
-        func11();
-        int a = cacota();
-        aas();
+        func2();
+        int a = f3();
+        main();
+        new Array();
+        f4();
         main()
-        cacotaDelNorte();
+        f5();
         System.out.println(Arrays.deepToString(array));
     }
 }

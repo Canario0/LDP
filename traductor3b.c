@@ -3,11 +3,6 @@
 #include <string.h>
 #include "lex.yy.c"
 #define LONG 500  // longitud de los identificadores
-int preanalisis;
-char id1[LONG], id2[LONG];
-char nombreClase[LONG];
-FILE *out_file;
-
 void parea(int);
 void error();
 void prog();
@@ -21,6 +16,31 @@ void func2();
 void code();
 void code2();
 void params();
+void addFunc();
+void printDefinitions();
+void addCall();
+void printCalls();
+void printNodes();
+
+typedef struct nodeDefinitions {
+  char name[LONG];
+  struct nodeDefinitions *next;
+} definitions;
+
+typedef struct nodeCalls {
+  char caller[LONG];
+  char called[LONG];
+  struct nodeCalls *next;
+} calls;
+
+int preanalisis;
+char funcCaller[LONG], funcCalled[LONG];
+definitions *funcDefinidas;
+definitions *funcDefinidasFin;
+
+calls *funcCalls;
+calls *funcCallsFin;
+FILE *out_file;
 
 int main() {
   out_file = fopen("out", "w");
@@ -28,14 +48,65 @@ int main() {
     printf("Error! Could not open file\n");
     exit(-1);
   }
-  fprintf(out_file, "graph G {\n\tnode [shape=box];\n");
+  funcDefinidas = malloc(sizeof(definitions));
+  if (funcDefinidas == NULL) {
+    printf("Error reservando memoria\n");
+    exit(-1);
+  }
+  funcDefinidasFin = funcDefinidas;
+
+  funcCalls = malloc(sizeof(calls));
+  if (funcCalls == NULL) {
+    printf("Error reservando memoria\n");
+    exit(-1);
+  }
+  funcCallsFin = funcCalls;
+
+  fprintf(out_file, "strict digraph G {\n\tnode [shape=box];\n");
   preanalisis = yylex();
   prog();
   if (preanalisis == 0) {  // yylex() devuelve 0 en el fin de fichero
     printf("OK\n");
+    printNodes();
     fprintf(out_file, "}\n");
+    // printDefinitions();
+    // printCalls();
   } else
     printf("Sobra algo\n");
+}
+
+void printNodes() {
+  struct nodeDefinitions *func = funcDefinidas;
+  calls *aux = funcCalls;
+  while (aux != funcCallsFin) {
+    while (func != funcDefinidasFin) {
+      if (strcmp(aux->called, func->name)==0) {
+        fprintf(out_file,"\t%s -> %s\n", aux->caller, aux->called);
+        break;
+      }
+      func = func->next;
+    }
+    func = funcDefinidas;
+    aux = aux->next;
+  }
+}
+
+void printDefinitions() {
+  struct nodeDefinitions *aux;
+  aux = funcDefinidas;
+  while (aux != funcDefinidasFin) {
+    printf("%s\n", aux->name);
+    aux = aux->next;
+  }
+}
+
+void printCalls() {
+  struct nodeCalls *aux;
+  aux = funcCalls;
+  while (aux != funcCallsFin) {
+    printf("%s -> %s\n", aux->caller, aux->called);
+    aux = aux->next;
+  }
 }
 
 void parea(int token) {
@@ -85,7 +156,7 @@ void inter() {
 
 void func1() {
   if (preanalisis == ID) {
-    strcpy(id1, yytext);
+    strcpy(funcCaller, yytext);
     parea(ID);
     func1();
   } else if (preanalisis == ';' || preanalisis == '(' || preanalisis == '{') {
@@ -108,14 +179,14 @@ void params() {
 
 void code() {
   if (preanalisis == ID) {
-    strcpy(id2, yytext);
+    strcpy(funcCalled, yytext);
     parea(ID);
     code();
   } else if (preanalisis == ';') {
     parea(';');
     code();
   } else if (preanalisis == '(') {
-    fprintf(out_file, "\t\"%s\" -- \"%s\";\n", id1, id2);
+    addCall();
     parea('(');
     code();
     parea(')');
@@ -158,6 +229,7 @@ void code2() {
 
 void func() {
   if (preanalisis == '{') {
+    addFunc();
     parea('{');
     code();
     parea('}');
@@ -169,6 +241,21 @@ void func() {
     printf("func:");
     error();
   }
+}
+
+void addFunc() {
+  strcpy(funcDefinidasFin->name, funcCaller);
+  struct nodeDefinitions *aux = malloc(sizeof(definitions));
+  funcDefinidasFin->next = aux;
+  funcDefinidasFin = funcDefinidasFin->next;
+}
+
+void addCall() {
+  strcpy(funcCallsFin->caller, funcCaller);
+  strcpy(funcCallsFin->called, funcCalled);
+  struct nodeCalls *aux = malloc(sizeof(calls));
+  funcCallsFin->next = aux;
+  funcCallsFin = funcCallsFin->next;
 }
 
 void llaves() {
@@ -193,13 +280,13 @@ void func2() {
   } else if (preanalisis == ';') {
     parea(';');
     body();
-  }else if (preanalisis == '{'){
+  } else if (preanalisis == '{') {
     parea('{');
     llaves();
     parea('}');
     parea(';');
     body();
-  }else if (preanalisis == '}') {
+  } else if (preanalisis == '}') {
   } else {
     printf("func2:");
     error();
@@ -209,7 +296,7 @@ void func2() {
 void body() {
   if (preanalisis == ID) {
     parea(ID);
-    strcpy(id1, yytext);
+    strcpy(funcCaller, yytext);
     // parea(ID);
     // func1();
     inter();
