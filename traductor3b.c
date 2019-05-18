@@ -16,11 +16,11 @@ void func2();
 void code();
 void code2();
 void params();
-void addFunc();
+void addFunc(); // añade un nombre a la lista de funciones definida
 void printDefinitions();
-void addCall();
+void addCall(); // añade el par funcCaller, funcCalled a la lista de llamadas
 void printCalls();
-void printNodes();
+void printNodes();// imprime las llamadas
 
 typedef struct nodeDefinitions {
   char name[LONG];
@@ -159,7 +159,13 @@ void func1() {
     strcpy(funcCaller, yytext);
     parea(ID);
     func1();
-  } else if (preanalisis == ';' || preanalisis == '(' || preanalisis == '{') {
+  } else if (preanalisis == '{') {
+    parea('{');
+    llaves();
+    parea('}');
+    parea(';');
+    body();
+  } else if (preanalisis == ';' || preanalisis == '(' || preanalisis =='}') {
   } else {
     printf("func1:");
     error();
@@ -280,12 +286,6 @@ void func2() {
   } else if (preanalisis == ';') {
     parea(';');
     body();
-  } else if (preanalisis == '{') {
-    parea('{');
-    llaves();
-    parea('}');
-    parea(';');
-    body();
   } else if (preanalisis == '}') {
   } else {
     printf("func2:");
@@ -297,8 +297,6 @@ void body() {
   if (preanalisis == ID) {
     parea(ID);
     strcpy(funcCaller, yytext);
-    // parea(ID);
-    // func1();
     inter();
     func2();
   } else if (preanalisis == '{') {
